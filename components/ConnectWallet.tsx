@@ -15,16 +15,20 @@ declare global {
 }
 
 function shortenAddress(addr: string): string {
-  return `${addr.slice(0, 4)}…${addr.slice(-4)}`
+  return `${addr.slice(0, 5)}…${addr.slice(-4)}`
 }
 
 export default function ConnectWallet() {
-  const [address, setAddress] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [address, setAddress]   = useState<string | null>(null)
+  const [loading, setLoading]   = useState(false)
   const [available, setAvailable] = useState(false)
+  // Prevent SSR/client hydration mismatch — render nothing until mounted.
+  const [mounted, setMounted]   = useState(false)
 
   useEffect(() => {
-    // Freighter injects after page load — poll briefly
+    setMounted(true)
+
+    // Freighter injects asynchronously after page load — poll until present.
     const timer = setInterval(() => {
       if (window.freighter) {
         setAvailable(true)
@@ -37,6 +41,7 @@ export default function ConnectWallet() {
           .catch(() => {})
       }
     }, 200)
+
     return () => clearInterval(timer)
   }, [])
 
@@ -50,7 +55,7 @@ export default function ConnectWallet() {
       const key = await window.freighter.getPublicKey()
       setAddress(key)
     } catch {
-      // user cancelled
+      // user cancelled — no-op
     } finally {
       setLoading(false)
     }
@@ -59,6 +64,8 @@ export default function ConnectWallet() {
   function disconnect() {
     setAddress(null)
   }
+
+  if (!mounted) return null
 
   if (address) {
     return (

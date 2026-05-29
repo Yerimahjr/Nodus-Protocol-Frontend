@@ -9,7 +9,7 @@ export default function Home() {
       <div className="relative z-10 max-w-3xl">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-1.5 text-sm text-violet-400">
           <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
-          Mainnet live — explore the protocol
+          Now on testnet — mainnet launching Q3 2026
         </div>
 
         <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl">

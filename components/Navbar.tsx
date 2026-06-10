@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import ConnectWallet from "./ConnectWallet"
 
 const navLinks = [
   { label: "Protocol", href: "/protocol" },
@@ -67,10 +68,7 @@ export default function Navbar() {
 
           {/* Right side: CTA + hamburger */}
           <div className="flex items-center gap-3">
-            <button className="hidden items-center gap-2 rounded-full border border-violet-500/30 bg-violet-600/10 px-5 py-2 text-sm font-medium text-violet-300 transition-all hover:border-violet-400/50 hover:bg-violet-600/20 hover:text-white md:inline-flex">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-              Connect Wallet
-            </button>
+            <ConnectWallet />
 
             {/* Mobile hamburger */}
             <button
@@ -110,10 +108,9 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-2">
-            <button className="flex w-full items-center justify-center gap-2 rounded-full border border-violet-500/30 bg-violet-600/10 px-5 py-2.5 text-sm font-medium text-violet-300 transition-all hover:bg-violet-600/20 hover:text-white">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
-              Connect Wallet
-            </button>
+            <div className="flex w-full justify-center">
+              <ConnectWallet />
+            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,23 @@
-export default function Home() {
+import { pool, type PoolStats } from "@/lib/api"
+
+async function getPoolStats(): Promise<PoolStats | null> {
+  try {
+    const res = await pool.stats()
+    return res.data
+  } catch {
+    return null
+  }
+}
+
+function fmt(n: number, decimals = 4): string {
+  return n.toLocaleString("en-US", { maximumFractionDigits: decimals })
+}
+
+export default async function Home() {
+  const stats = await getPoolStats()
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "#"
+  const docsUrl = process.env.NEXT_PUBLIC_DOCS_URL ?? "/docs"
+
   return (
     <div className="relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center overflow-hidden px-4 text-center">
       {/* Ambient glow */}
@@ -26,13 +45,51 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <button className="rounded-full bg-gradient-to-r from-violet-600 to-cyan-600 px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90">
+          <a
+            href={appUrl}
+            className="rounded-full bg-gradient-to-r from-violet-600 to-cyan-600 px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
             Launch App
-          </button>
-          <button className="rounded-full border border-white/10 px-8 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-white/20 hover:text-white">
+          </a>
+          <a
+            href={docsUrl}
+            className="rounded-full border border-white/10 px-8 py-3 text-sm font-medium text-gray-300 transition-colors hover:border-white/20 hover:text-white"
+          >
             Read Docs
-          </button>
+          </a>
         </div>
+
+        {/* Live pool stats — only rendered when the backend is reachable */}
+        {stats && (
+          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              {
+                label: `${stats.reserves.token_0} Reserve`,
+                value: fmt(parseFloat(stats.reserves.reserve_0)),
+              },
+              {
+                label: `${stats.reserves.token_1} Reserve`,
+                value: fmt(parseFloat(stats.reserves.reserve_1)),
+              },
+              {
+                label: `${stats.reserves.token_0} Price`,
+                value: `$${fmt(stats.price_token0_in_token1)}`,
+              },
+              {
+                label: "Fee",
+                value: `${(stats.fee_bps / 100).toFixed(2)}%`,
+              },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-5"
+              >
+                <p className="mb-1 text-xs text-gray-500">{label}</p>
+                <p className="text-lg font-semibold text-white">{value}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

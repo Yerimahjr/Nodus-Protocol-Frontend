@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import ConnectWallet from "./ConnectWallet"
+import { useAuth } from "@/hooks/useAuth"
 
 const navLinks = [
   { label: "Protocol", href: "/protocol" },
@@ -14,12 +14,64 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const { state, connect, disconnect, shortAddress } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
+
+  function WalletButton({ fullWidth = false }: { fullWidth?: boolean }) {
+    const base = fullWidth
+      ? "flex w-full items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all"
+      : "hidden items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all md:inline-flex"
+
+    if (state.status === "connecting") {
+      return (
+        <button disabled className={`${base} border border-violet-500/30 bg-violet-600/10 text-violet-400 opacity-60`}>
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+          Connecting…
+        </button>
+      )
+    }
+
+    if (state.status === "connected" && shortAddress) {
+      return (
+        <button
+          onClick={disconnect}
+          className={`${base} border border-cyan-500/30 bg-cyan-600/10 text-cyan-300 hover:border-red-400/40 hover:bg-red-600/10 hover:text-red-300`}
+          title="Click to disconnect"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+          {shortAddress}
+        </button>
+      )
+    }
+
+    if (state.status === "error") {
+      return (
+        <button
+          onClick={connect}
+          className={`${base} border border-red-500/30 bg-red-600/10 text-red-400 hover:bg-red-600/20`}
+          title={state.error ?? undefined}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+          Retry
+        </button>
+      )
+    }
+
+    return (
+      <button
+        onClick={connect}
+        className={`${base} border border-violet-500/30 bg-violet-600/10 text-violet-300 hover:border-violet-400/50 hover:bg-violet-600/20 hover:text-white`}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+        Connect Wallet
+      </button>
+    )
+  }
 
   return (
     <nav
@@ -66,9 +118,9 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right side: CTA + hamburger */}
+          {/* Right side: wallet button + hamburger */}
           <div className="flex items-center gap-3">
-            <ConnectWallet />
+            <WalletButton />
 
             {/* Mobile hamburger */}
             <button
@@ -108,10 +160,11 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-2">
-            <div className="flex w-full justify-center">
-              <ConnectWallet />
-            </div>
+            <WalletButton fullWidth />
           </div>
+          {state.status === "error" && state.error && (
+            <p className="px-3 pt-1 text-xs text-red-400">{state.error}</p>
+          )}
         </div>
       </div>
     </nav>

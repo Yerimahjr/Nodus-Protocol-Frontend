@@ -2,18 +2,6 @@
 
 import { useState, useEffect } from "react"
 
-interface FreighterApi {
-  isConnected: () => Promise<boolean>
-  getPublicKey: () => Promise<string>
-  getNetwork: () => Promise<string>
-}
-
-declare global {
-  interface Window {
-    freighter?: FreighterApi
-  }
-}
-
 function shortenAddress(addr: string): string {
   return `${addr.slice(0, 5)}…${addr.slice(-4)}`
 }
@@ -26,7 +14,10 @@ export default function ConnectWallet() {
   const [mounted, setMounted]   = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    async function init() {
+      setMounted(true)
+    }
+    init()
 
     // Freighter injects asynchronously after page load — poll until present.
     const timer = setInterval(() => {
